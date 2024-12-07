@@ -37,4 +37,5 @@
 	      (download-format-file file))
 	    (list-images-from-file tmp-file))))
 
-(download-images-from-4chan "https://boards.4chan.org/wg/thread/7997149")
+;; replace this url with a valid url thread
+(download-images-from-4chan "https://boards.4chan.org/wg/thread/...")
