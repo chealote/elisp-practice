@@ -16,10 +16,10 @@
     (insert-file-contents filePath)
     (buffer-string)))
 
-(defun download-format-file (url)
+(defun download-format-file (url output-folder-path)
   (let (
 	(new-url (concat "https:" url))
-	(output-file (concat "/tmp/" (nth 4 (split-string url "/"))))
+	(output-file (concat output-folder-path (nth 4 (split-string url "/"))))
 	)
     (if new-url
 	(url-copy-file new-url output-file t)
@@ -28,14 +28,16 @@
 (defun list-images-from-file (file)
   (re-seq "\\/\\/i\\.4cdn\\.org/wg/[0-9]+\\.\\(jpg\\|png\\)" (get-string-from-file file)))
 
-(defun download-images-from-4chan (url)
+(defun download-images-from-4chan (url output-folder)
   (let (
 	(tmp-file "/tmp/test.html")
 	)
     (url-copy-file url tmp-file t)
     (mapcar (lambda (file)
-	      (download-format-file file))
+	      (download-format-file file output-folder))
 	    (list-images-from-file tmp-file))))
 
 ;; replace this url with a valid url thread
-(download-images-from-4chan "https://boards.4chan.org/wg/thread/...")
+(download-images-from-4chan
+ "https://boards.4chan.org/wg/thread/..."
+ "~/Pictures/Wallpapers")
