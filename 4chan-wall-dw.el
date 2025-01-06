@@ -2,6 +2,9 @@
 ;; https://emacs.stackexchange.com/questions/7148/get-all-regexp-matches-in-buffer-as-a-list
 ;; http://xahlee.info/emacs/emacs/elisp_read_file_content.html
 
+(setq command-prefix-set-bg-wallpaper "feh --bg-fill ")
+(setq base-wallpaper-folder "~/Pictures/Wallpapers/")
+
 (defun re-seq (regexp string)
   "Get a list of all regexp matches in a string"
   (save-match-data
@@ -26,7 +29,7 @@
 
 (defun download-format-file (url output-folder-path)
   (let ((new-url (format-4chan-img-url url))
-	(output-file (concat output-folder-path (nth 4 (split-string url "/")))))
+        (output-file (concat output-folder-path (nth 4 (split-string url "/")))))
     (url-copy-file new-url output-file t)
     output-file))
 
@@ -35,26 +38,39 @@
       (setq path (concat path "/")))
   (if (not (file-directory-p path))
       (progn
-	(message "folder doesn't exists, creating it...")
-	(make-directory path)))
+        (message "folder doesn't exists, creating it...")
+        (make-directory path)))
   path)
 
 (defun download-or-use-local-file (html-page-file)
-    (if (not (file-exists-p html-page-file))
-	(url-copy-file (read-string "4chan url: ") html-page-file)
-      (let ((user-response
-	     (read-string (concat "4chan url (blank to use file " html-page-file "): "))))
-	(if (not (string= user-response ""))
-	    (url-copy-file user-response html-page-file t))))
-    html-page-file)
+  (if (not (file-exists-p html-page-file))
+      (url-copy-file (read-string "4chan url: ") html-page-file)
+    (let ((user-response
+           (read-string (concat "4chan url (blank to use file " html-page-file "): "))))
+      (if (not (string= user-response ""))
+          (url-copy-file user-response html-page-file t))))
+  html-page-file)
 
 (defun set-as-wallpaper (filepath)
-  (shell-command (concat "feh --bg-fill " filepath)))
+  (shell-command (concat command-prefix-set-bg-wallpaper filepath)))
 
-(let (
-      (image-list
-       (list-images-from-file (download-or-use-local-file "/tmp/index.html")))
-      (save-wallpaper-path
-       (check-output-path "~/Pictures/Wallpapers/")))
+(defun download-single-random-image-and-set-wallpaper (image-list save-wallpaper-path)
   (let ((random-image (nth (random (length image-list)) image-list)))
     (set-as-wallpaper (download-format-file random-image save-wallpaper-path))))
+
+(defun download-all-images (image-list save-wallpaper-path)
+  (let ((final-output-path
+         (check-output-path (concat save-wallpaper-path (read-string "title of the images: ") "/"))))
+    (dolist (image image-list) (download-format-file image final-output-path))))
+
+(defun random-image ()
+  (let ((files (directory-files base-wallpaper-folder t "^[^\.]" t)))
+    (nth (random (length files)) files)))
+
+(set-as-wallpaper (random-image))
+
+;; (let ((image-list
+;;        (list-images-from-file (download-or-use-local-file "/tmp/index.html")))
+;;        (save-wallpaper-path
+;; (check-output-path base-wallpaper-folder)))
+;;   (download-all-images image-list save-wallpaper-path))
